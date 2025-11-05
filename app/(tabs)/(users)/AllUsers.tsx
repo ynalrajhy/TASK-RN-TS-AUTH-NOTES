@@ -2,7 +2,13 @@ import { ScrollView, StyleSheet } from "react-native";
 import React from "react";
 import colors from "../../../data/styling/colors";
 import UserProfileCard from "../../../components/UserProfileCard";
+import { useQuery } from "@tanstack/react-query";
+import { getAllUsers } from "../../../api/auth";
 const Users = () => {
+  const { data: users } = useQuery({
+    queryKey: ["All Users"],
+    queryFn: getAllUsers,
+  });
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.primary }}>
       <UserProfileCard
@@ -10,6 +16,14 @@ const Users = () => {
         email="test@test.com"
         username="test"
       />
+      {users?.map((user: any) => (
+        <UserProfileCard
+          key={user._id}
+          imageUrl={user.imageUrl}
+          email={user.email}
+          username={user.username}
+        />
+      ))}
     </ScrollView>
   );
 };
