@@ -3,17 +3,33 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import colors from "../data/styling/colors";
 import { StatusBar } from "react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AuthContext from "@/Context /AthuContext";
+import { useEffect, useState } from "react";
+import { getToken, removeToken } from "@/api/storage";
 export default function RootLayout() {
   const queryClient = new QueryClient();
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await getToken();
+      // console.log("err");
+      if (token) {
+        setIsAuthenticated(true);
+      }
+    };
+    checkToken();
+    // removeToken();
+  }, []);
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary }}>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(auth)" />
+              {/* <Stack.Screen name="(protected)" /> */}
+            </Stack>
+          </AuthContext.Provider>
         </QueryClientProvider>
         <StatusBar barStyle={"light-content"} />
       </SafeAreaView>

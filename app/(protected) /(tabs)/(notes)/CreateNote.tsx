@@ -7,17 +7,31 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
-import colors from "../../../data/styling/colors";
+import colors from "../../../../data/styling/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { useMutation } from "@tanstack/react-query";
+import { NoteType } from "@/types/NoteType";
+import { createNote } from "@/api/notes";
+import { router, useRouter } from "expo-router";
 const AddNote = () => {
   const [title, setTitle] = useState("");
   const [topics, setTopics] = useState([""]);
   const [noteBody, setNoteBody] = useState("");
-
+  const Navigate = useRouter();
   const addTopic = () => {
     setTopics([...topics, ""]);
   };
+  const { mutate } = useMutation({
+    mutationFn: (note: NoteType) =>
+      createNote({ title: note.title, topic: note.topic, body: note.body }),
+    onError: (error) => {
+      console.log(error);
+    },
+    onSuccess: () => {
+      Navigate.push("/(home)" as any);
+      alert("Note created successfully");
+    },
+  });
 
   const updateTopic = (text: string, index: number) => {
     const newTopics = [...topics];
@@ -173,6 +187,7 @@ const AddNote = () => {
               borderWidth: 1,
               borderColor: "rgba(0,0,0,0.1)",
             }}
+            onPress={() => mutate({ title, topic: topics, body: noteBody })}
           >
             <Text
               style={{

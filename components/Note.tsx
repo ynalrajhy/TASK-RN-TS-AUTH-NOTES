@@ -51,7 +51,7 @@ const Note = ({ note }: { note: NoteType }) => {
             opacity: 0.8,
           }}
         >
-          Created By: {note.user.name}
+          Created By: {note.user?.name}
         </Text>
 
         <View
@@ -85,7 +85,7 @@ const Note = ({ note }: { note: NoteType }) => {
             alignItems: "center",
             marginBottom: 5,
           }}
-          onPress={() => router.push(`/${note._id}`)}
+          onPress={() => router.push(`/${note._id}` as any)}
         >
           <Text
             style={{

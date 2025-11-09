@@ -7,10 +7,33 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
+import React, { useContext, useState } from "react";
 import colors from "../../data/styling/colors";
+import { login } from "@/api/auth";
+import { useMutation } from "@tanstack/react-query";
+import UserInfo from "@/types/UserInfo";
+import { storeToken } from "@/api/storage";
+import AuthContext from "@/Context /AthuContext";
+import { useRouter } from "expo-router";
 
 const Index = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { setIsAuthenticated } = useContext(AuthContext);
+
+  const router = useRouter();
+
+  const { mutate } = useMutation({
+    mutationKey: ["Login"],
+    mutationFn: (userInfo: UserInfo) =>
+      login({ email: userInfo.email, password: userInfo.password }),
+    onSuccess: async (data) => {
+      await storeToken(data.token);
+      setIsAuthenticated(true);
+
+      router.push("/(protected) /(tabs)/(home)");
+    },
+  });
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -29,7 +52,6 @@ const Index = () => {
           <Text style={{ color: colors.white, fontSize: 16 }}>
             Login to your account
           </Text>
-
           <TextInput
             style={{
               backgroundColor: colors.white,
@@ -37,9 +59,9 @@ const Index = () => {
               borderRadius: 5,
               marginTop: 20,
             }}
+            onChangeText={setEmail}
             placeholder="Email"
           />
-
           <TextInput
             style={{
               backgroundColor: colors.white,
@@ -47,9 +69,9 @@ const Index = () => {
               borderRadius: 5,
               marginTop: 20,
             }}
+            onChangeText={setPassword}
             placeholder="Password"
           />
-
           <TouchableOpacity
             style={{
               backgroundColor: colors.white,
@@ -58,7 +80,9 @@ const Index = () => {
               marginTop: 20,
               alignItems: "center",
             }}
-            onPress={() => {}}
+            onPress={() => {
+              mutate({ email, password });
+            }}
           >
             <Text
               style={{
@@ -70,12 +94,14 @@ const Index = () => {
               Login
             </Text>
           </TouchableOpacity>
-
+          
           <Text style={{ color: colors.white, fontSize: 16 }}>
             Don't have an account?{" "}
-            <Text style={{ color: colors.white, fontWeight: "bold" }}>
-              Register
-            </Text>
+            <TouchableOpacity onPress={() => router.push("/Register")}>
+              <Text style={{ color: colors.white, fontSize: 16 }}>
+                Register
+              </Text>
+            </TouchableOpacity>
           </Text>
         </View>
       </View>
